@@ -23,8 +23,8 @@ def harmony():  # put application's code here
 
 
 @app.route('/harmony/demoness')
-def harmony():  # put application's code here
-    return 'SavantLabHarmony redirect goes here'
+def harmony_demoness():  # put application's code here
+    return 'SavantLabHarmonyWithDemoness redirect goes here'
 
 
 @app.route('/archives')
@@ -38,15 +38,15 @@ def shop():  # put application's code here
 
 
 @app.route('/demoness')
-def shop():  # put application's code here
+def demoness():  # put application's code here
     return 'Redirect to portfolio app artist statement goes here'
 
 
 @app.route('/some-encrypted-string')
-def shop():  # put application's code here
+def admin_login():  # put application's code here
     return 'Admin login link goes here, two factor auth'
 
 
 @app.route('/articles')
-def shop():  # put application's code here
+def articles():  # put application's code here
     return 'Articles served from a database app'
