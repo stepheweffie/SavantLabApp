@@ -1,34 +1,52 @@
 from flask import current_app as app
 
+""" 
+the landing page will allow a client to view a menu on mobile and more on large screens
+/lab is the stream first lab view 
+/harmony has an optional demo and "draw like Demoness" interactive game/experience  
+"""
+
 
 @app.route('/')
 def landing_page():  # put application's code here
     return 'SavantLabLandingPage goes here'
 
 
-@app.route('/index')
+@app.route('/lab')
 def index():  # put application's code here
-    return 'SavantLabIndex goes here'
+    return 'SavantLab goes here'
 
 
 @app.route('/harmony')
 def harmony():  # put application's code here
-    return 'SavantLabHarmony goes here'
+    return 'SavantLabHarmony redirect goes here'
 
 
-@app.route('/live')
-def live():  # put application's code here
-    return 'SavantLabLive goes here'
+@app.route('/harmony/demoness')
+def harmony():  # put application's code here
+    return 'SavantLabHarmony redirect goes here'
 
 
 @app.route('/archives')
 def archives():  # put application's code here
-    return 'SavantLabArchives goes here!'
+    return 'SavantLabArchives playlist goes here'
 
 
 @app.route('/shop')
 def shop():  # put application's code here
-    return 'SavantLabShop goes here'
+    return 'SavantLabShop redirect goes here, external app'
 
 
+@app.route('/demoness')
+def shop():  # put application's code here
+    return 'Redirect to portfolio app artist statement goes here'
 
+
+@app.route('/some-encrypted-string')
+def shop():  # put application's code here
+    return 'Admin login link goes here, two factor auth'
+
+
+@app.route('/articles')
+def shop():  # put application's code here
+    return 'Articles served from a database app'
