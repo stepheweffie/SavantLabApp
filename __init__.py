@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_bootstrap import Bootstrap
 
 
 def create_app():
@@ -12,6 +13,7 @@ def create_app():
         # From application module
         from application import routes
         print("Flask Factory Built")
+        Bootstrap(flask_app)
         return flask_app
 
 
