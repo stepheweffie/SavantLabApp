@@ -4,7 +4,7 @@ from flask_bootstrap import Bootstrap
 
 def create_app():
     '''Flask Factory'''
-    flask_app = Flask(__name__, instance_relative_config=True)
+    flask_app = Flask(__name__, instance_relative_config=True, instance_path='/instance')
     print('Uses .env and config.py for settings ')
     from werkzeug.utils import import_string
     cfg = import_string('config.DevConfig')()

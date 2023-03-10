@@ -1,4 +1,6 @@
 from flask import current_app as app
+from flask import send_from_directory
+
 
 """ 
 the landing page will allow a client to view a menu on mobile and more on large screens
@@ -9,7 +11,8 @@ the landing page will allow a client to view a menu on mobile and more on large 
 
 @app.route('/')
 def landing_page():  # put application's code here
-    return "/templates/landingpage.html"
+    template = 'landingpage.html'
+    send_from_directory(app.config['TEMPLATE_DIR'], path=template)
 
 
 @app.route('/lab')
