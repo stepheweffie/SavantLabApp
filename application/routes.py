@@ -9,7 +9,7 @@ the landing page will allow a client to view a menu on mobile and more on large 
 
 @app.route('/')
 def landing_page():  # put application's code here
-    return 'SavantLabLandingPage goes here'
+    return "/templates/landingpage.html"
 
 
 @app.route('/lab')
