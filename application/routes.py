@@ -13,13 +13,23 @@ the landing page will allow a client to view a menu on mobile and more on large 
 def landing_page():  # put application's code here
     if request.method == 'POST':
         session['email'] = request.form['email']
-        return redirect(url_for('index'))
+        # TODO validate and email the generated auth code
+        return redirect(url_for('check_email'))
     return render_template('landingpage.html')
 
 
-@app.route('/lab')
+@app.route('/check-email', methods=['GET', 'POST'])
+def check_email():
+    if request.method == 'POST':
+        # TODO check auth
+        session['auth'] = request.form['auth']
+        return redirect(url_for('index'))
+    return render_template('check_email.html')
+
+
+@app.route('/lab', methods=['GET', 'POST'])
 def index():  # put application's code here
-    if ['email'] in session:
+    if ['auth'] in session:
         return render_template('index.html')
     else:
         return redirect(url_for('landing_page'))
