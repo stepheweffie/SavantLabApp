@@ -21,7 +21,7 @@ def index():  # put application's code here
 
 @app.route('/harmony')
 def harmony():  # put application's code here
-    return render_template('/harmony.html')
+    return render_template('harmony.html')
 
 
 @app.route('/harmony/demoness')
