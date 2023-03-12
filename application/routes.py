@@ -1,5 +1,5 @@
 from flask import current_app as app
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, request, session
 
 
 """ 
@@ -9,14 +9,20 @@ the landing page will allow a client to view a menu on mobile and more on large 
 """
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def landing_page():  # put application's code here
+    if request.method == 'POST':
+        session['email'] = request.form['email']
+        return redirect(url_for('index'))
     return render_template('landingpage.html')
 
 
 @app.route('/lab')
 def index():  # put application's code here
-    return render_template('index.html')
+    if ['email'] in session:
+        return render_template('index.html')
+    else:
+        return redirect(url_for('landing_page'))
 
 
 @app.route('/harmony')
