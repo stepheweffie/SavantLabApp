@@ -1,6 +1,5 @@
 from os import environ
 from dotenv import load_dotenv, find_dotenv
-from os import path
 
 
 class DevConfig:

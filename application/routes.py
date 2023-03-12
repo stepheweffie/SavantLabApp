@@ -1,5 +1,5 @@
 from flask import current_app as app
-from flask import send_from_directory
+from flask import render_template, redirect, url_for
 
 
 """ 
@@ -11,23 +11,22 @@ the landing page will allow a client to view a menu on mobile and more on large 
 
 @app.route('/')
 def landing_page():  # put application's code here
-    template = 'landingpage.html'
-    send_from_directory(app.config['TEMPLATE_DIR'], path=template)
+    return render_template('landingpage.html')
 
 
 @app.route('/lab')
 def index():  # put application's code here
-    return 'SavantLab goes here'
+    return render_template('index.html')
 
 
 @app.route('/harmony')
 def harmony():  # put application's code here
-    return 'SavantLabHarmony redirect goes here'
+    return render_template('/harmony.html')
 
 
 @app.route('/harmony/demoness')
 def harmony_demoness():  # put application's code here
-    return 'SavantLabHarmonyWithDemoness redirect goes here'
+    return redirect(url_for('archives'))
 
 
 @app.route('/archives')

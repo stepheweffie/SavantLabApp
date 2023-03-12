@@ -1,5 +1,4 @@
 from flask import Flask
-from flask_bootstrap import Bootstrap
 
 
 def create_app():
@@ -11,9 +10,8 @@ def create_app():
     flask_app.config.from_object(cfg)
     with flask_app.app_context():
         # From application module
-        from application import routes
+        import routes
         print("Flask Factory Built")
-        Bootstrap(flask_app)
         return flask_app
 
 
