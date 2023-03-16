@@ -1,4 +1,5 @@
-from __main__ import db
+from flask_sqlalchemy import SQLAlchemy
+db = SQLAlchemy()
 
 
 class Product(db.Model):
@@ -15,4 +16,8 @@ class CartItem(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
 
 
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(50), nullable=False, unique=True)
 
