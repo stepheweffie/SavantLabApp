@@ -1,7 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from models import Product
-from flask_redis import FlaskRedis
 
 
 db = SQLAlchemy()

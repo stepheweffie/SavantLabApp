@@ -95,9 +95,10 @@ class AdminHomeView(AdminIndexView):
         if request.method == 'GET':
             return self.render('/admin/index.html', form=form)
         if form.validate_on_submit():
-            product = Product(name=form.name.data, description=form.description.data)
+            product = Product(name=form.name.data, description=form.description.data, price=form.price.data)
             db.session.add(product)
             db.session.commit()
             form.name.data = ''
             form.description.data = ''
+            form.price.data = ''
         return render_template('index.html', form=form)
