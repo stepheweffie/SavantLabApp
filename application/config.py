@@ -8,5 +8,4 @@ class DevConfig:
     TESTING = True
     DEBUG = True
     ENV = 'development'
-    SECRET_KEY = environ.get('SECRET_KEY')
     TEMPLATE_DIR = '/templates'

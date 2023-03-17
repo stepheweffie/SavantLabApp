@@ -1,6 +1,10 @@
 from flask import Flask
 from models import Product
 from models import db as db
+from flask_session import Session
+import redis
+
+session = Session()
 
 
 def create_app():
@@ -10,10 +14,17 @@ def create_app():
     from werkzeug.utils import import_string
     cfg = import_string('config.DevConfig')()
     flask_app.config.from_object(cfg)
+
     flask_app.config['SECRET_KEY'] = 'mysecretkey'
     flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///store.db'
-    flask_app.config['REDIS_URL'] = 'redis://localhost:6379/0'
+    flask_app.config['SESSION_TYPE'] = 'redis'
+    flask_app.config['REDIS_URI'] = 'redis://localhost:6379/0'
+    redis_uri = flask_app.config['REDIS_URI']
+    flask_app.config['SESSION_REDIS'] = redis.from_url(redis_uri)
+
     db.init_app(flask_app)
+    session.init_app(flask_app)
+
     with flask_app.app_context():
         # From application module
         import routes
