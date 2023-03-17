@@ -1,9 +1,6 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from models import Product
-
-
-db = SQLAlchemy()
+from models import db as db
 
 
 def create_app():

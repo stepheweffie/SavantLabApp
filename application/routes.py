@@ -1,10 +1,12 @@
 from flask import current_app as app
-from flask import render_template, redirect, url_for, request, session
+from flask import render_template, redirect, url_for, request, session, Response
 from __main__ import db
 from flask_admin import expose, AdminIndexView
 from forms import ProductForm
-from models import Product
-
+from models import Product, Recording
+from flask_admin.contrib.sqla import ModelView
+import cv2
+import pygame
 
 """ 
 the landing page will allow a client to view a menu on mobile and more on large screens
@@ -43,8 +45,31 @@ def check_email():
 def index():  # put application's code here
     if 'auth' in session:
         return render_template('index.html')
+    if 'lab' in session:
+        return screen_feed()
     else:
         return redirect(url_for('landing_page'))
+
+
+@app.route('/lab/live', methods=['GET'])
+def screen_feed():
+    def gen():
+        Recording.start_recording()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        Recording.stop_recording()
+            Recording.record_frame()
+            if not Recording.__init__().recording:
+                break
+        for frame in Recording.frames:
+            ret, jpeg = cv2.imencode('.jpg', frame)
+            frame = jpeg.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        Recording.frames = []
+    return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 @app.route('/harmony')
@@ -87,13 +112,37 @@ def articles():  # put application's code here
     return 'Articles served from a database app'
 
 
+@app.route('/webcam')
+def webcam_feed():
+    def gen():
+        cap = cv2.VideoCapture(0)
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            # Encode the frame as jpeg
+            ret, jpeg = cv2.imencode('.jpg', frame)
+            frame = jpeg.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
 class AdminHomeView(AdminIndexView):
     @expose('/', methods=['GET'])
     @app.route('/admin')
     def admin_index(self):
+        return self.render('admin/index.html')
+
+
+class RuleView(ModelView):
+    form_create_rules = ('name', 'description', 'price')
+
+    @expose('/', methods=['GET', 'POST'])
+    def admin_index(self):
         form = ProductForm()
         if request.method == 'GET':
-            return self.render('/admin/index.html', form=form)
+            return self.render('admin/store.html', form=form)
         if form.validate_on_submit():
             product = Product(name=form.name.data, description=form.description.data, price=form.price.data)
             db.session.add(product)
@@ -101,4 +150,5 @@ class AdminHomeView(AdminIndexView):
             form.name.data = ''
             form.description.data = ''
             form.price.data = ''
-        return render_template('index.html', form=form)
+        return self.render('admin/store.html', form=form)
+
