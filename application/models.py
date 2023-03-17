@@ -1,22 +1,9 @@
+import datetime
 from flask_sqlalchemy import SQLAlchemy
 import pygame
 import cv2
 
 db = SQLAlchemy()
-
-
-class Product(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    cost = db.Column(db.Float, nullable=False)
-    date_sold = db.Column(db.String(), nullable=False)
-
-
-class CartItem(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
-    quantity = db.Column(db.Integer, nullable=False)
 
 
 class User(db.Model):
@@ -25,13 +12,15 @@ class User(db.Model):
     email = db.Column(db.String(50), nullable=False, unique=True)
 
 
-class Recording():
+class Recording(db.Model):
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((0, 0), pygame.WINDOWEXPOSED)
         self.clock = pygame.time.Clock()
         self.recording = False
         self.frames = []
+        self.lab_recording = db.Column(db.ARRAY, nullable=False, unique=True)
+        self.lab_datetime = db.Column(db.DateTime)
 
     def start_recording(self):
         self.recording = True
@@ -46,4 +35,6 @@ class Recording():
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
             self.frames.append(frame)
 
-
+        else:
+            self.lab_recording = self.frames
+            self.lab_datetime = datetime.datetime.now()
