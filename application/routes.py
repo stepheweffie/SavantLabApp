@@ -1,9 +1,8 @@
 from flask import current_app as app
 from flask import render_template, redirect, url_for, request, session, Response
 from __main__ import db
-from flask_admin import expose, AdminIndexView
-from forms import ProductForm
-from models import Product, Recording
+from flask_admin import expose, AdminIndexView, BaseView
+from models import Recording
 from flask_admin.contrib.sqla import ModelView
 import cv2
 import pygame
@@ -77,24 +76,9 @@ def harmony():  # put application's code here
     return render_template('harmony.html')
 
 
-@app.route('/harmony/demoness')
-def harmony_demoness():  # put application's code here
-    return redirect(url_for('archives'))
-
-
 @app.route('/archives')
 def archives():  # put application's code here
     return 'SavantLabArchives playlist goes here'
-
-
-@app.route('/shop')
-def shop():  # put application's code here
-    return render_template('products.html')
-
-
-@app.route('/cart')
-def cart():  # put application's code here
-    return render_template('cart.html')
 
 
 @app.route('/demoness')
@@ -128,30 +112,16 @@ def webcam_feed():
     return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
+class MyLab(BaseView):
+    @expose('/')
+    def index(self):
+        return self.render('harmony_lab.html')
+
+
 class AdminHomeView(AdminIndexView):
     @expose('/', methods=['GET'])
     @app.route('/admin')
     def admin_index(self):
-        return self.render('admin/index.html')
+        return self.render('admin/index.html', lab_links=True)
 
-
-# for coffers
-
-
-class RuleView(ModelView):
-    form_create_rules = ('name', 'description', 'price')
-
-    @expose('/', methods=['GET', 'POST'])
-    def admin_index(self):
-        form = ProductForm()
-        if request.method == 'GET':
-            return self.render('admin/store.html', form=form)
-        if form.validate_on_submit():
-            product = Product(name=form.name.data, description=form.description.data, price=form.price.data)
-            db.session.add(product)
-            db.session.commit()
-            form.name.data = ''
-            form.description.data = ''
-            form.price.data = ''
-        return self.render('admin/store.html', form=form)
 

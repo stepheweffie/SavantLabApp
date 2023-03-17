@@ -1,3 +1,6 @@
 {% extends 'admin/master.html' %}
 
 
+{% if lab_links %}
+    <a href="{{ url_for('harmony_lab.index') }}" class="btn btn-primary">Start Harmony Lab</a>
+{% endif %}

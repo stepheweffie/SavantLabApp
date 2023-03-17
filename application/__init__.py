@@ -1,5 +1,4 @@
 from flask import Flask
-from models import Product
 from models import db as db
 from flask_session import Session
 import redis
