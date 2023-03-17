@@ -9,7 +9,7 @@ Script:400,500,600,700|Bilbo+Swash+Caps|Kaushan+Script|Pirata+One|Ruthie|Sail|La
 Swash+Caps&family=Seaweed+Script&family=Trade+Winds&family=Viaoda+Libre&display=swap" rel="stylesheet">
 {% endblock %}
 {% block brand %}
-<a class="navbar-brand" href="{{ admin_view.admin.url }}">Admin</a>
+<a class="navbar-brand" href="{{ admin_view.admin.url }}">SavantLab</a>
 {% endblock %}
 {% block style %}
 <style>
@@ -130,6 +130,7 @@ Swash+Caps&family=Seaweed+Script&family=Trade+Winds&family=Viaoda+Libre&display=
 {% block page_body %}
 {{ super() }}
 {% endblock %}
+{% block body %}{% endblock %}
 <script>
     let darkMode;
         darkMode = function() {
