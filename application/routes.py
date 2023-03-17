@@ -135,6 +135,9 @@ class AdminHomeView(AdminIndexView):
         return self.render('admin/index.html')
 
 
+# for coffers
+
+
 class RuleView(ModelView):
     form_create_rules = ('name', 'description', 'price')
 

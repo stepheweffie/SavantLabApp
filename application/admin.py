@@ -7,13 +7,16 @@ from routes import AdminHomeView
 from models import db, Product
 from redis import Redis
 from flask_admin.contrib import rediscli
+from flask_admin.contrib.rediscli import RedisCli
 
 
 path = op.join(op.dirname(__file__), 'labs')
 admin = Admin(app, index_view=AdminHomeView(), template_mode='bootstrap3')
 admin.add_view(FileAdmin(base_path=path, name="Labs"))
 # admin.add_view(ModelView(recording, name="Harmony Lab"))
-admin.add_view(ModelView(Product, db.session, name="Products"))
+# admin.add_view(ModelView(Product, db.session, name="Products"))
 admin.add_view(rediscli.RedisCli(Redis()))
+# admin.add_view(RedisCli(endpoint='localhost:6379'))
+
 # static_path = op.join(op.dirname(__file__), 'static')
 # admin.add_view(FileAdmin(static_path, '/static/videos', name='Video Files'))

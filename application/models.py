@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 import pygame
 import cv2
+
 db = SQLAlchemy()
 
 
