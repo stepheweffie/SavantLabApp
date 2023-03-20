@@ -15,29 +15,40 @@ class User(db.Model):
     email = db.Column(db.String(50), nullable=False, unique=True)
 
 
-class Recording(Base):
+
+class Recording():
+    def __init__(self):
+        self.drawing = []
+        self.video = []
+        self.webcam = []
+        self.eyes = []
+
+
+
+#pygame recreated drawing with pixels
+class Recreate(Base):
     __tablename__ = 'lab_recordings'
     id = Column(Integer, primary_key=True)
-    # TODO number the labs
 
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((0, 0), pygame.WINDOWEXPOSED)
+        self.screen =
         self.clock = pygame.time.Clock()
         self.recording = False
+        self.drawing = []
         self.frames = []
         self.lab_datetime = db.Column(db.DateTime)
         self.lab_recording = db.Column(db.ARRAY, nullable=False, unique=True)
 
-    def start_recording(self):
+    def start_recreate(self):
         self.recording = True
 
-    def stop_recording(self):
+    def stop_recreate(self):
         self.recording = False
 
-    def record_frame(self):
+    def recreate_frame(self):
         if self.recording:
-            self.clock.tick(30)
+            self.drawing = []
             frame = pygame.surfarray.array3d(self.screen)
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
             self.frames.append(frame)

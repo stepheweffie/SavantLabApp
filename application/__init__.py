@@ -7,6 +7,7 @@ session = Session()
 redis_host = 'localhost'
 redis_port = 6379
 redis_db = 0
+r = redis.Redis(host=redis_host, port=redis_port, db=redis_db)
 
 
 def create_app():
@@ -24,9 +25,6 @@ def create_app():
     redis_uri = flask_app.config['REDIS_URI']
     flask_app.config['SESSION_REDIS'] = redis.from_url(redis_uri)
     flask_app.config['REDIS_URL'] = redis_uri
-
-    redis_conn = redis.Redis(host=redis_host, port=redis_port, db=redis_db)
-
     db.init_app(flask_app)
     session.init_app(flask_app)
 

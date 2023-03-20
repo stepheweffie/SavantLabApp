@@ -1,8 +1,8 @@
 from flask import current_app as app
 from flask import render_template, redirect, url_for, request, session, Response
-from __main__ import db
+from __main__ import db, r
 from flask_admin import expose, AdminIndexView, BaseView
-from models import Recording
+from models import Recreate, Recording
 from flask_admin.contrib.sqla import ModelView
 import cv2
 import pygame
@@ -41,9 +41,9 @@ def check_email():
 
 
 @app.route('/lab', methods=['GET', 'POST'])
-def index():  # put application's code here
+def index():  # put lab here
     if 'auth' in session:
-        return render_template('index.html')
+        return render_template('lab.html')
     if 'lab' in session:
         return screen_feed()
     else:
@@ -52,33 +52,12 @@ def index():  # put application's code here
 
 @app.route('/lab/live', methods=['GET'])
 def screen_feed():
-    def gen():
-        Recording.start_recording()
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        Recording.stop_recording()
-            Recording.record_frame()
-            if not Recording.__init__().recording:
-                break
-        for frame in Recording.frames:
-            ret, jpeg = cv2.imencode('.jpg', frame)
-            frame = jpeg.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-        Recording.frames = []
-    return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return render_template('live_stream.html')
 
 
 @app.route('/harmony')
 def harmony():  # put application's code here
     return render_template('harmony.html')
-
-
-@app.route('/archives')
-def archives():  # put application's code here
-    return 'SavantLabArchives playlist goes here'
 
 
 @app.route('/demoness')
@@ -94,6 +73,27 @@ def admin_login():  # put application's code here
 @app.route('/articles')
 def articles():  # put application's code here
     return 'Articles served from a database app'
+
+
+@app.route('/recording')
+def recording_feed():
+    def record():
+        Recording.start_recording()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        Recording.stop_recording()
+            Recording.record_frame()
+            if not Recording.__init__().recording:
+                break
+        for frame in Recording.frames:
+            ret, jpeg = cv2.imencode('.jpg', frame)
+            frame = jpeg.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        Recording.frames = []
+    return Response(record(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 @app.route('/webcam')
@@ -112,10 +112,34 @@ def webcam_feed():
     return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
+@app.route('/recreate')
+def recreate_feed():
+    def redraw():
+        Recreate.start_recreate(self=True)
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        Recreate.stop_recreate(self=False)
+            Recreate.record_frame()
+            if not Recreate.__init__(self=False).recording:
+                break
+        for frame in Recreate.frames:
+            ret, jpeg = cv2.imencode('.jpg', frame)
+            frame = jpeg.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        Recreate.frames = []
+    return Response(redraw(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
 class MyLab(BaseView):
     @expose('/')
     def index(self):
-        return self.render('harmony_lab.html')
+        eye_data = webcam_feed()
+        drawing_data = recreate_feed()
+        pixel_data = recording_feed()
+        return self.render('harmony_lab.html', pixel_stream=pixel_data, drawing_stream=drawing_data, eye_stream=eye_data)
 
 
 class AdminHomeView(AdminIndexView):
