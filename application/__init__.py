@@ -2,6 +2,9 @@ from flask import Flask
 from models import db as db
 from flask_session import Session
 import redis
+from flask_socketio import SocketIO
+from flask_cors import CORS
+
 
 session = Session()
 redis_host = 'localhost'
@@ -25,6 +28,7 @@ def create_app():
     redis_uri = flask_app.config['REDIS_URI']
     flask_app.config['SESSION_REDIS'] = redis.from_url(redis_uri)
     flask_app.config['REDIS_URL'] = redis_uri
+    CORS(flask_app)
     db.init_app(flask_app)
     session.init_app(flask_app)
 
@@ -42,5 +46,5 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    socketio = SocketIO(app, cors_allowed_origins="*")
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)

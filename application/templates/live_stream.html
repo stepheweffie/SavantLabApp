@@ -1,0 +1,19 @@
+{% extends 'harmony.html' %}
+
+<script>
+        const canvas = document.getElementsByTagName('canvas');
+        const ctx = canvas.getContext('2d');
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('drawing_data', (data) => {
+            if (data) {
+                ctx.beginPath();
+                ctx.strokeStyle = data.color;
+                ctx.lineWidth = data.lineWidth;
+                ctx.moveTo(data.prevX, data.prevY);
+                ctx.lineTo(data.currX, data.currY);
+                ctx.stroke();
+                ctx.closePath();
+            }
+        });
+    </script>

@@ -4,7 +4,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask import current_app as app
 from flask_admin.contrib.fileadmin import FileAdmin
 from routes import AdminHomeView, MyLab
-from models import db, Recording
+from models import db, Drawing
 from redis import Redis
 from flask_admin.contrib import rediscli
 
@@ -21,5 +21,5 @@ path = op.join(op.dirname(__file__), 'labs')
 admin = Admin(app, index_view=AdminHomeView(), template_mode='bootstrap3')
 admin.add_view(MyLab(name='My Lab', endpoint='harmony_lab'))
 admin.add_view(FileAdmin(base_path=path, name="Labs"))
-admin.add_view(RecordingAdminView(Recording, db.session))
+admin.add_view(RecordingAdminView(Drawing, db.session))
 admin.add_view(rediscli.RedisCli(Redis()))
