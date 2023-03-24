@@ -67,7 +67,7 @@
         function submitDrawing() {
             // Get the drawing data from the canvas
             // Store the drawing data in a hidden field
-            document.getElementById('drawing-data').value = 'DrawingData;
+            document.getElementById('drawing-data');
             // Submit the form
             document.getElementById('invisible-form').submit();
             sendData();
@@ -75,6 +75,7 @@
     </script>
 	</head>
 	<body>
+        <div id="content">{% block content %}
 
     {% from "macros/render_form.html" import render_form %}
     {% with form=form, form_action=url_for('submit_drawing') %}
@@ -84,24 +85,24 @@
         </form>
     {% endwith %}
 
-        <button onclick=submitDrawing() id="submitBtn">Submit Drawing</button>
+        <button onclick=submitDrawing() class="button" name="submitDraw" id="submitBtn" formmethod="post" formaction="/">Submit Drawing</button>
         <script>// JavaScript code to hide/show button based on the current route
         if(window.location.pathname === '/harmony') {
-          // Hide the button for route1
+
           $('#submitBtn').hide();
-        } else if(window.location.pathname === '/lab') {
-          // Show the button for route2
-          $('#submitBtn').hide();
+        } if(window.location.pathname === '/lab') {
+
+            $('#submitBtn').hide();
         }
-         } else if(window.location.pathname === '/lab/live') {
-          // Show the button for route2
-          $('#submitBtn').hide();
+         } if(window.location.pathname === '/lab/live') {
+
+            $('#submitBtn').hide();
         }
-          else if(window.location.pathname === '/harmony-lab') {
-              $('#submitBtn').show();
+          if(window.location.pathname === '/harmony-lab') {
+            $('#submitBtn').show();
         }
         // Add an event listener to the submit button to send the pixel and pressure data to the server
-      $('#submitBtn').click(function() {
+      $('').click(function() {
         let pixelDataString = JSON.stringify(pixelData);
         let pressureDataString = JSON.stringify(pressureData);
 
@@ -123,8 +124,8 @@
       });
 
         }
-
 </script>
+{% endblock %}</div>
 
     <script type="text/javascript" src="static/harmony/js/brushes/shaded.js"></script>
 		<script type="text/javascript" src="static/harmony/js/colorutils.js"></script>

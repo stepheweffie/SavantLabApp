@@ -87,20 +87,19 @@ def harmony():  # put application's code here
 
 
 @app.route('/harmony-lab')
-def harmony_lab():
-    def submit_drawing():
+def submit_drawing():
+    def harmony_lab():
         form = DrawingForm()
         if form.validate_on_submit():
             # Get the drawing data from the form
             drawing_data = request.form.get('drawing_data')
-
             # Save the drawing data to the SQLite database
             new_drawing = Drawing(data=drawing_data)
             db.session.add(new_drawing)
             db.session.commit()
-
-            return redirect(url_for('success'))
-        return render_template('harmony_lab.html', form=form)
+            return render_template('harmony_lab.html', form=form)
+        return redirect(url_for('success'))
+    harmony_lab()
     return render_template('harmony_lab.html')
 
 
