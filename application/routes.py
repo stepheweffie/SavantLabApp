@@ -99,6 +99,7 @@ def submit_drawing():
             db.session.commit()
             return render_template('harmony_lab.html', form=form)
         return redirect(url_for('success'))
+    # if submitBtn clicked then run the lab
     harmony_lab()
     return render_template('harmony_lab.html')
 
