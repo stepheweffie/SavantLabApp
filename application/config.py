@@ -9,3 +9,5 @@ class DevConfig:
     DEBUG = True
     ENV = 'development'
     TEMPLATE_DIR = '/templates'
+    ARTICLES_DIR = '/articles'
+    LABS_DIR = '/labs'

@@ -11,8 +11,8 @@ from models import Recreate, Recording, Drawing
 from forms import DrawingForm
 from flask_admin.contrib.sqla import ModelView
 import cv2
+import numpy as np
 import pygame
-# app.py
 import base64
 import io
 from PIL import Image
@@ -24,6 +24,7 @@ the landing page will allow a client to view a menu on mobile and more on large 
 /lab is the stream first lab view 
 /harmony has an optional demo and "draw like Demoness" interactive game/experience  
 """
+drawing_form = DrawingForm
 
 
 @app.before_request
@@ -57,7 +58,7 @@ def index():  # put lab here
     if 'auth' in session:
         return render_template('lab.html')
     if 'lab' in session:
-        return url_for(screen_feed)
+        return url_for('screen_feed')
     else:
         return redirect(url_for('landing_page'))
 
@@ -66,10 +67,8 @@ def index():  # put lab here
 def notebook():
     nb_path = os.path.join(os.getcwd(), 'drawing_analysis.ipynb')
     html_path = os.path.join(os.getcwd(), 'drawing_analysis.html')
-
     # Convert the notebook to an HTML file
     subprocess.call(['jupyter', 'nbconvert', '--to', 'html', nb_path, '--output', html_path])
-
     # Serve the HTML file
     return send_file(html_path)
 
@@ -83,13 +82,15 @@ def screen_feed():
 
 @app.route('/harmony')
 def harmony():  # put application's code here
-    return render_template('harmony.html')
+    form = drawing_form
+    return render_template('harmony.html', form=form)
 
 
 @app.route('/harmony-lab')
 def submit_drawing():
+    form = drawing_form
+
     def harmony_lab():
-        form = DrawingForm()
         if form.validate_on_submit():
             # Get the drawing data from the form
             drawing_data = request.form.get('drawing_data')
@@ -97,11 +98,10 @@ def submit_drawing():
             new_drawing = Drawing(data=drawing_data)
             db.session.add(new_drawing)
             db.session.commit()
-            return render_template('harmony_lab.html', form=form)
-        return redirect(url_for('success'))
+            return redirect(url_for('success'))
     # if submitBtn clicked then run the lab
     harmony_lab()
-    return render_template('harmony_lab.html')
+    return render_template('harmony_lab.html', form=form)
 
 
 @app.route('/demoness')
@@ -160,7 +160,6 @@ def recreate_feed():
 channel = 'pixel_data'
 
 
-# app.py
 @socketio.on('mousemove')
 def handle_mousemove(data):
     r.set('drawing_data', data)  # Save drawing data in Redis
@@ -187,14 +186,16 @@ def handle_drawing_data(data):
 class MyLab(BaseView):
     @expose('/', methods=['GET', 'POST'])
     def index(self):
+        form = drawing_form
+        # the SQL is handled by the form and the model not the route
         if request == 'POST':
             pixel_data = request.json['pixel_data']
             pressure_data = request.json['pressure_data']
             # Store the pixel and pressure data in Redis
             r.set('pixel_data', pixel_data)
             r.set('pressure_data', pressure_data)
-            return self.render('harmony_lab.html')
-        return self.render('harmony_lab.html')
+            return self.render('harmony_lab.html', form=form)
+        return self.render('harmony_lab.html', form=form)
 
 
 class AdminHomeView(AdminIndexView):

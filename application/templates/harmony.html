@@ -4,7 +4,6 @@
 		<meta charset="utf-8"/>
 		<meta name="description" content="Procedural Drawing Tool"/>
 		<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
-
         <style type="text/css">
 			*
 			{
@@ -77,29 +76,26 @@
 	<body>
         <div id="content">{% block content %}
 
-    {% from "macros/render_form.html" import render_form %}
     {% with form=form, form_action=url_for('submit_drawing') %}
         <form id="invisible-form" method="post" style="display: none;">
-            {{ render_form(form) }}
+            {{ form.csrf_token }}
             <input type="hidden" name="drawing_data" id="drawing-data">
         </form>
     {% endwith %}
 
         <button onclick=submitDrawing() class="button" name="submitDraw" id="submitBtn" formmethod="post" formaction="/">Submit Drawing</button>
         <script>// JavaScript code to hide/show button based on the current route
-        if(window.location.pathname === '/harmony') {
-
-          $('#submitBtn').hide();
-        } if(window.location.pathname === '/lab') {
-
-            $('#submitBtn').hide();
+           if(window.location.pathname === '/harmony') {
+                $('#submitBtn').hide();
         }
-         } if(window.location.pathname === '/lab/live') {
-
-            $('#submitBtn').hide();
+           if(window.location.pathname === '/lab') {
+                $('#submitBtn').hide();
         }
-          if(window.location.pathname === '/harmony-lab') {
-            $('#submitBtn').show();
+           if(window.location.pathname === '/lab/live') {
+                $('#submitBtn').hide();
+        }
+           if(window.location.pathname === '/harmony-lab') {
+                $('#submitBtn').show();
         }
         // Add an event listener to the submit button to send the pixel and pressure data to the server
       $('').click(function() {
@@ -120,7 +116,7 @@
             console.log(error);
           }
         });
-        document.getElementById('drawing-data').value = {1: pixelDataString, 2: pressureDataString};
+        document.getElementById('drawing-data').value = {pixel_data: pixelDataString, pressure_data: pressureDataString};
       });
 
         }
@@ -135,8 +131,6 @@
 		<script type="text/javascript" src="static/harmony/js/about.js"></script>
 		<script type="text/javascript" src="static/harmony/js/main.js"></script>
 
-	</body>
-</html>
 <!-- draw.html -->
 <!-- ... -->
 <script>
@@ -149,7 +143,5 @@
     // ...
 </script>
 
-</body>
-
-
+    </body>
 </html>

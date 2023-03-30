@@ -17,9 +17,12 @@ class RecordingAdminView(ModelView):
     page_size = 50  # number of records to display per page
 
 
-path = op.join(op.dirname(__file__), 'labs')
+# TODO make articles_path a mongo db view
+lab_path = op.join(op.dirname(__file__), 'labs')
+# articles_path = op.join(op.dirname(__file__), 'articles')
 admin = Admin(app, index_view=AdminHomeView(), template_mode='bootstrap3')
 admin.add_view(MyLab(name='My Lab', endpoint='harmony_lab'))
-admin.add_view(FileAdmin(base_path=path, name="Labs"))
+admin.add_view(FileAdmin(base_path=lab_path, name="Labs"))
+# admin.add_view(FileAdmin(base_path=articles_path, name='Articles'))
 admin.add_view(RecordingAdminView(Drawing, db.session))
 admin.add_view(rediscli.RedisCli(Redis()))
