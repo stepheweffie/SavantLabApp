@@ -1,5 +1,6 @@
 <!DOCTYPE HTML>
 <html lang="en">
+{% block head %}
 	<head>
 		<meta charset="utf-8"/>
 		<meta name="description" content="Procedural Drawing Tool"/>
@@ -61,87 +62,26 @@
 		</style>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+	{% endblock %}
+    </head>
 
-    <script>
-        function submitDrawing() {
-            // Get the drawing data from the canvas
-            // Store the drawing data in a hidden field
-            document.getElementById('drawing-data');
-            // Submit the form
-            document.getElementById('invisible-form').submit();
-            sendData();
-        }
-    </script>
-	</head>
-	<body>
-        <div id="content">{% block content %}
+    <body>
+        <div id="content">{% block content %}{% endblock %}
+                {% block custom_js %}{% endblock %}
 
-    {% with form=form, form_action=url_for('submit_drawing') %}
-        <form id="invisible-form" method="post" style="display: none;">
-            {{ form.csrf_token }}
-            <input type="hidden" name="drawing_data" id="drawing-data">
-        </form>
-    {% endwith %}
+        </div>
 
-        <button onclick=submitDrawing() class="button" name="submitDraw" id="submitBtn" formmethod="post" formaction="/">Submit Drawing</button>
-        <script>// JavaScript code to hide/show button based on the current route
-           if(window.location.pathname === '/harmony') {
-                $('#submitBtn').hide();
-        }
-           if(window.location.pathname === '/lab') {
-                $('#submitBtn').hide();
-        }
-           if(window.location.pathname === '/lab/live') {
-                $('#submitBtn').hide();
-        }
-           if(window.location.pathname === '/harmony-lab') {
-                $('#submitBtn').show();
-        }
-        // Add an event listener to the submit button to send the pixel and pressure data to the server
-      $('').click(function() {
-        let pixelDataString = JSON.stringify(pixelData);
-        let pressureDataString = JSON.stringify(pressureData);
+        {% block scripts %}
 
-        $.ajax({
-          url: '/',
-          type: 'POST',
-          data: {
-            'pixel_data': pixelDataString,
-            'pressure_data': pressureDataString
-          },
-          success: function(response) {
-            console.log(response);
-          },
-          error: function(error) {
-            console.log(error);
-          }
-        });
-        document.getElementById('drawing-data').value = {pixel_data: pixelDataString, pressure_data: pressureDataString};
-      });
-
-        }
-</script>
-{% endblock %}</div>
-
-    <script type="text/javascript" src="static/harmony/js/brushes/shaded.js"></script>
+        <script type="text/javascript" src="static/harmony/js/brushes/shaded.js"></script>
 		<script type="text/javascript" src="static/harmony/js/colorutils.js"></script>
 		<script type="text/javascript" src="static/harmony/js/colorselector.js"></script>
 		<script type="text/javascript" src="static/harmony/js/palette.js"></script>
 		<script type="text/javascript" src="static/harmony/js/menu.js"></script>
 		<script type="text/javascript" src="static/harmony/js/about.js"></script>
 		<script type="text/javascript" src="static/harmony/js/main.js"></script>
-
+{% endblock %}
 <!-- draw.html -->
 <!-- ... -->
-<script>
-    // ...
-    function sendData() {
-        const dataURL = canvas.toDataURL("image/png");
-        const base64_data = dataURL.replace(/^data:image\/png;base64,/, "");
-        socket.emit('drawing_data', {pixel_data: base64_data});
-    }
-    // ...
-</script>
-
     </body>
 </html>

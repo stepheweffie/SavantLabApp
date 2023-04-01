@@ -4,7 +4,7 @@ from flask import send_file
 import os
 import subprocess
 from flask import current_app as app
-from flask import render_template, redirect, url_for, request, session, Response
+from flask import render_template, redirect, url_for, request, session, Response, g
 from __main__ import db, r
 from flask_admin import expose, AdminIndexView, BaseView
 from models import Recreate, Recording, Drawing
@@ -27,10 +27,21 @@ the landing page will allow a client to view a menu on mobile and more on large 
 drawing_form = DrawingForm
 
 
+def is_two_factor_authenticated():
+    # Replace this with the appropriate condition to check if the user is authenticated with 2FA
+    return True if 'two_factor_auth' in session and session['two_factor_auth'] is True else False
+
+
 @app.before_request
 def load_user():
-    if "auth" in session:
-        g.user = db.session.get(session["username"])
+    try:
+        username = session.get("username")
+        if username:
+            g.user = db.session.get(session["username"])
+        else:
+            g.user = None
+    except KeyError:
+        pass
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -55,8 +66,9 @@ def check_email():
 
 @app.route('/lab', methods=['GET', 'POST'])
 def index():  # put lab here
-    if 'auth' in session:
-        return render_template('lab.html')
+    form = drawing_form
+    if is_two_factor_authenticated:
+        return render_template('lab.html', form=form)
     if 'lab' in session:
         return url_for('screen_feed')
     else:
@@ -76,32 +88,27 @@ def notebook():
 @app.route('/lab/live', methods=['GET'])
 def screen_feed():
     join_room(channel)
-    pixel_data = r.lrange(channel, 0, -1)
-    return render_template('live_stream.html', pixel_data=pixel_data)
+    drawing_data = r.lrange(channel, 0, -1)
+    return render_template('live_stream.html', pixel_data=drawing_data)
 
 
 @app.route('/harmony')
 def harmony():  # put application's code here
     form = drawing_form
-    return render_template('harmony.html', form=form)
-
-
-@app.route('/harmony-lab')
-def submit_drawing():
-    form = drawing_form
-
-    def harmony_lab():
+    if is_two_factor_authenticated:
+        return redirect(url_for('index'))
+    if admin_login:
+        return render_template('harmony.html', form=form)
+    if request == 'POST':
+        pixel_data = request.json['pixel_data']
+        pressure_data = request.json['pressure_data']
+        # Store the pixel and pressure data in Redis
+        r.set('pixel_data', pixel_data)
+        r.set('pressure_data', pressure_data)
         if form.validate_on_submit():
-            # Get the drawing data from the form
-            drawing_data = request.form.get('drawing_data')
-            # Save the drawing data to the SQLite database
-            new_drawing = Drawing(data=drawing_data)
-            db.session.add(new_drawing)
-            db.session.commit()
-            return redirect(url_for('success'))
-    # if submitBtn clicked then run the lab
-    harmony_lab()
-    return render_template('harmony_lab.html', form=form)
+            # TODO complete the db table entry
+            redirect(url_for('harmony'))
+    return render_template('harmony.html', form=form)
 
 
 @app.route('/demoness')
@@ -129,8 +136,7 @@ def recording_feed():
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
         Recording.frames = []
-    return Response(record(), mimetype='multipart/x-mixed-replace; boundary=frame',
-                    )
+    return Response(record(), mimetype='multipart/x-mixed-replace; boundary=frame',)
 
 
 @app.route('/webcam')
@@ -157,7 +163,7 @@ def recreate_feed():
                         content_type='text/event-stream')
 
 
-channel = 'pixel_data'
+channel = 'drawing_data'
 
 
 @socketio.on('mousemove')
@@ -176,7 +182,7 @@ def handle_draw(data):
 
 @socketio.on('drawing_data')
 def handle_drawing_data(data):
-    base64_data = data['pixel_data']
+    base64_data = data['drawing_data']
     image_data = base64.b64decode(base64_data)
     image = Image.open(io.BytesIO(image_data))
     img_array = np.array(image)
@@ -187,15 +193,10 @@ class MyLab(BaseView):
     @expose('/', methods=['GET', 'POST'])
     def index(self):
         form = drawing_form
-        # the SQL is handled by the form and the model not the route
-        if request == 'POST':
-            pixel_data = request.json['pixel_data']
-            pressure_data = request.json['pressure_data']
-            # Store the pixel and pressure data in Redis
-            r.set('pixel_data', pixel_data)
-            r.set('pressure_data', pressure_data)
-            return self.render('harmony_lab.html', form=form)
-        return self.render('harmony_lab.html', form=form)
+        # TODO make the button start the lab
+        if form.validate_on_submit(self):
+            return self.render('harmony.html', form=form)
+        return self.render('harmony.html', form=form)
 
 
 class AdminHomeView(AdminIndexView):

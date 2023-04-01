@@ -1,0 +1,42 @@
+{% extends 'harmony.html' %}
+
+{% block content %}
+    {% with form=form, form_action=url_for('harmony') %}
+        <form id="invisible-form" method="post" style="display: none;">
+            {{ form.csrf_token }}
+            <input type="hidden" name="drawing_data" id="drawing-data">
+        </form>
+    {% endwith %}
+<button class="button" name="submitDraw" id="submitBtn" formmethod="post" formaction="/">Submit Drawing</button>
+{% endblock %}
+{% block custom_js %}
+
+<script>
+        // Add an event listener to the submit button to send the pixel and pressure data to the server
+      $('').click(function() {
+        let pixelDataString = JSON.stringify(pixelData);
+        let pressureDataString = JSON.stringify(pressureData);
+
+        $.ajax({
+          url: '/',
+          type: 'POST',
+          data: {
+            'pixel_data': pixelDataString,
+            'pressure_data': pressureDataString
+          },
+          success: function(response) {
+            console.log(response);
+          },
+          error: function(error) {
+            console.log(error);
+          }
+        });
+          document.getElementById('drawing-data').value = {pixel_data: pixelDataString, pressure_data: pressureDataString};
+      });
+        }
+</script>
+
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+{% endblock %}
