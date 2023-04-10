@@ -214,15 +214,14 @@ def handle_drawing_data(data):
 
 
 @socketio.on('submit', namespace='/admin/harmony')
-    def submit(data):
-        movements = json.dumps(data['movements'])
-        drawing = json.dumps(data['last_drawing'])
-        r.set('last_drawing', drawing)
-        r.set('movements', movements)
-        mouse_data = MouseData(movements=movements, drawing=drawing)
-        db.session.add(mouse_data)
-        db.session.commit()
-
+def submit(data):
+    movements = json.dumps(data['movements'])
+    drawing = json.dumps(data['last_drawing'])
+    r.set('last_drawing', drawing)
+    r.set('movements', movements)
+    mouse_data = MouseData(movements=movements, drawing=drawing)
+    db.session.add(mouse_data)
+    db.session.commit()
 
 
 class MyLab(BaseView):

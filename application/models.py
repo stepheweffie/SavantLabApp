@@ -1,10 +1,15 @@
 import datetime
-from . import r
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer
 import pygame
 from flask_login import UserMixin
 from sqlalchemy.ext.declarative import declarative_base
+import redis
+
+redis_host = 'localhost'
+redis_port = 6379
+redis_db = 0
+r = redis.Redis(host=redis_host, port=redis_port, db=redis_db)
 
 db = SQLAlchemy()
 Base = declarative_base()
@@ -32,7 +37,7 @@ class MouseData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     movements = db.Column(db.Text, nullable=False)
     drawing = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow())
 
     def __repr__(self):
         return f'<MouseData {self.id}>'
