@@ -4,12 +4,15 @@ from flask_session import Session
 import redis
 from flask_socketio import SocketIO
 from flask_cors import CORS
+from flask_login import LoginManager
+from models import User
 
 session = Session()
 redis_host = 'localhost'
 redis_port = 6379
 redis_db = 0
 r = redis.Redis(host=redis_host, port=redis_port, db=redis_db)
+login_manager = LoginManager()
 
 
 def create_app():
@@ -28,8 +31,13 @@ def create_app():
     flask_app.config['SESSION_REDIS'] = redis.from_url(redis_uri)
     flask_app.config['REDIS_URL'] = redis_uri
     CORS(flask_app)
+    login_manager.init_app(flask_app)
     db.init_app(flask_app)
     session.init_app(flask_app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
 
     with flask_app.app_context():
         # From application module

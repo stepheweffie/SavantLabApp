@@ -1,7 +1,7 @@
 {% extends 'harmony.html' %}
 
 {% block content %}
-    {% with form=form, form_action=url_for('harmony') %}
+    {% with form=form, form_action=url_for('index') %}
         <form id="invisible-form" method="post" style="display: none;">
             {{ form.csrf_token }}
             <input type="hidden" name="drawing_data" id="drawing-data">

@@ -15,6 +15,7 @@ import numpy as np
 import pygame
 import base64
 import io
+from flask_login import current_user
 from PIL import Image
 from flask_socketio import emit, SocketIO, join_room
 import mediapipe as mp
@@ -102,14 +103,14 @@ def lab_live():
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
-@app.route('/lab', methods=['GET', 'POST'])
+@app.route('/admin/lab', methods=['GET', 'POST'])
 def index():
     form = drawing_form
-    if is_two_factor_authenticated:
+    if is_two_factor_authenticated and not admin_login:
         return render_template('live_stream.html', form=form)
-    elif admin_login:
+    elif current_user and admin_login:
         # lab_live()
-        return render_template('lab.html')
+        return render_template('admin/lab.html')
     if request == 'POST':
         if form.validate_on_submit():
             pixel_data = request.json['pixel_data']
@@ -124,11 +125,6 @@ def index():
 
 @app.route('/harmony')
 def harmony():  # put application's code here
-    if is_two_factor_authenticated:
-        return redirect(url_for('index'))
-    if admin_login:
-        # lab_live()
-        return render_template('lab.html')
     return render_template('harmony.html')
 
 
