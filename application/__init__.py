@@ -5,7 +5,6 @@ import redis
 from flask_socketio import SocketIO
 from flask_cors import CORS
 
-
 session = Session()
 redis_host = 'localhost'
 redis_port = 6379

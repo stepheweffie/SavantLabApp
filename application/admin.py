@@ -1,12 +1,15 @@
 import os.path as op
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from flask import current_app as app
+from flask import current_app as app, session
 from flask_admin.contrib.fileadmin import FileAdmin
 from routes import AdminHomeView, MyLab
 from models import db, Drawing
 from redis import Redis
 from flask_admin.contrib import rediscli
+from google.oauth2.credentials import Credentials
+
+credentials = Credentials.from_authorized_user_info(session["credentials"])
 
 
 class RecordingAdminView(ModelView):

@@ -1,18 +1,20 @@
 import datetime
+from . import r
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer
 import pygame
-import cv2
+from flask_login import UserMixin
 from sqlalchemy.ext.declarative import declarative_base
 
 db = SQLAlchemy()
 Base = declarative_base()
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(50), nullable=False, unique=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(120), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
 
 
 class Drawing(db.Model):
@@ -24,6 +26,16 @@ class Drawing(db.Model):
 
     def __repr__(self):
         return f"<Drawing {self.title}>"
+
+
+class MouseData(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    movements = db.Column(db.Text, nullable=False)
+    drawing = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<MouseData {self.id}>'
 
 
 class Recording():
@@ -47,7 +59,7 @@ class Recreate(Base):
         self.recording = False
         self.drawing = []
         self.frames = []
-        self.pixel_data = r.get('pixel_data')
+        self.pixel_data = r.get('drawing_data')
         self.lab_datetime = db.Column(db.DateTime)
         self.lab_recording = db.Column(db.ARRAY, nullable=False, unique=True)
 
