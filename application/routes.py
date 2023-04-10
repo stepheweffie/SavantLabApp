@@ -79,12 +79,13 @@ def notebook():
     return send_file(html_path)
 
 
-
 @app.route('/lab/live')
 def screen_feed():
     join_room(channel)
     drawing_data = r.lrange(channel, 0, -1)
     return render_template('live_stream.html', drawing_data=drawing_data)
+
+
 def lab_live():
     cap = cv2.VideoCapture(0)
     with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
@@ -101,12 +102,14 @@ def lab_live():
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
-
 @app.route('/lab', methods=['GET', 'POST'])
-def index():  # put lab here
+def index():
     form = drawing_form
     if is_two_factor_authenticated:
-        return render_template('lab.html', form=form)
+        return render_template('live_stream.html', form=form)
+    elif admin_login:
+        # lab_live()
+        return render_template('lab.html')
     if request == 'POST':
         if form.validate_on_submit():
             pixel_data = request.json['pixel_data']
@@ -116,11 +119,7 @@ def index():  # put lab here
             r.set('pressure_data', pressure_data)
             redirect(url_for('index'))
         else:
-            redirect(url_for('index'))
-    if 'lab' in session:
-        return url_for('screen_feed')
-    else:
-        return redirect(url_for('landing_page'))
+            redirect(url_for('admin_index'))
 
 
 @app.route('/harmony')
@@ -128,6 +127,7 @@ def harmony():  # put application's code here
     if is_two_factor_authenticated:
         return redirect(url_for('index'))
     if admin_login:
+        # lab_live()
         return render_template('lab.html')
     return render_template('harmony.html')
 
@@ -187,7 +187,7 @@ def recreate_feed():
 channel = 'drawing_data'
 
 
-@socketio.on('mousemove', namespace='/admin/harmony')
+@socketio.on('mousemove', namespace='/admin/lab')
 def handle_mousemove(data):
     if len(r.llen('movements')) == 0:
         r.set('movements', data)  # Save drawing data in Redis
@@ -196,7 +196,7 @@ def handle_mousemove(data):
     emit('movements', data, broadcast=True)  # Emit drawing data to all clients
 
 
-@socketio.on('draw', namespace='/admin/harmony')
+@socketio.on('draw', namespace='/admin/lab')
 def handle_draw(data):
     # Store the pixel data in Redis
     r.rpush(channel, data)
@@ -204,7 +204,7 @@ def handle_draw(data):
     socketio.emit('lab/live', data, broadcast=True)
 
 
-@socketio.on('drawing_data', namespace='/admin/harmony')
+@socketio.on('drawing_data', namespace='/admin/lab')
 def handle_drawing_data(data):
     base64_data = data['drawing_data']
     image_data = base64.b64decode(base64_data)
@@ -213,7 +213,7 @@ def handle_drawing_data(data):
     # Do something with the NumPy array, e.g., save it to a file or perform analysis
 
 
-@socketio.on('submit', namespace='/admin/harmony')
+@socketio.on('submit', namespace='/admin/lab')
 def submit(data):
     movements = json.dumps(data['movements'])
     drawing = json.dumps(data['last_drawing'])
@@ -226,12 +226,12 @@ def submit(data):
 
 class MyLab(BaseView):
     @expose('/', methods=['GET', 'POST'])
-    @expose('/harmony')
+    @expose('/lab')
     def index(self):
         form = drawing_form
         if form.validate_on_submit(self):
-            return self.render('harmony.html', form=form)
-        return self.render('harmony.html', form=form)
+            return self.render('admin/lab.html', form=form)
+        return self.render('admin/lab.html', form=form)
 
 
 class AdminHomeView(AdminIndexView):
