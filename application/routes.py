@@ -107,10 +107,10 @@ def lab_live():
 def index():
     form = drawing_form
     if is_two_factor_authenticated and not admin_login:
-        return render_template('live_stream.html', form=form)
+        redirect(url_for('screen_feed'))
     elif current_user and admin_login:
         # lab_live()
-        return render_template('admin/lab.html')
+        return render_template('admin/lab.html', form=form)
     if request == 'POST':
         if form.validate_on_submit():
             pixel_data = request.json['pixel_data']
