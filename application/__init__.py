@@ -33,6 +33,7 @@ def create_app():
     flask_app.config['REDIS_URL'] = redis_uri
     CORS(flask_app)
     login_manager.init_app(flask_app)
+    socketio.init_app(flask_app)
     db.init_app(flask_app)
     session.init_app(flask_app)
 
@@ -46,7 +47,7 @@ def create_app():
         import forms
         import models
         import admin
-        socketio.init_app(flask_app)
+        import socketio_events
         db.create_all()
         print("Flask Factory Built")
         print("Store Database Built")

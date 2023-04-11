@@ -76,7 +76,7 @@ def notebook():
 
 @app.route('/lab/live')
 def screen_feed():
-    join_room(channel)
+    # join_room(channel)
     drawing_data = r.lrange(channel, 0, -1)
     return render_template('live_stream.html', drawing_data=drawing_data)
 
