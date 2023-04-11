@@ -6,8 +6,9 @@ from flask_socketio import SocketIO
 from flask_cors import CORS
 from flask_login import LoginManager
 from models import User
-
+from socketio_events import socketio
 session = Session()
+
 redis_host = 'localhost'
 redis_port = 6379
 redis_db = 0
@@ -45,6 +46,7 @@ def create_app():
         import forms
         import models
         import admin
+        socketio.init_app(flask_app)
         db.create_all()
         print("Flask Factory Built")
         print("Store Database Built")

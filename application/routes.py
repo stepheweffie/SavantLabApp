@@ -1,5 +1,3 @@
-import json
-import time
 from flask import send_file
 import os
 import subprocess
@@ -7,23 +5,19 @@ from flask import current_app as app
 from flask import render_template, redirect, url_for, request, session, Response, g
 from __main__ import db, r
 from flask_admin import expose, AdminIndexView, BaseView
-from models import Recreate, Recording, MouseData
+from models import Recreate, Recording
 from forms import DrawingForm
-from flask_admin.contrib.sqla import ModelView
+# from flask_admin.contrib.sqla import ModelView
 import cv2
-import numpy as np
-import pygame
-import base64
-import io
 from flask_login import current_user
-from PIL import Image
-from flask_socketio import emit, SocketIO, join_room
+from flask_socketio import join_room
 import mediapipe as mp
+
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
+channel = 'drawing_data'
 
-socketio = SocketIO(app)
 
 """ 
 the landing page will allow a client to view a menu on mobile and more on large screens
@@ -163,6 +157,7 @@ def webcam_feed():
         while True:
             ret, frame = cap.read()
             if not ret:
+
                 break
             # Encode the frame as jpeg
             ret, jpeg = cv2.imencode('.jpg', frame)
@@ -178,46 +173,6 @@ def recreate_feed():
         Recreate.start_recreate(self=True)
         return Response(redraw(), mimetype='multipart/x-mixed-replace; boundary=frame',
                         content_type='text/event-stream')
-
-
-channel = 'drawing_data'
-
-
-@socketio.on('mousemove', namespace='/admin/lab')
-def handle_mousemove(data):
-    if len(r.llen('movements')) == 0:
-        r.set('movements', data)  # Save drawing data in Redis
-    else:
-        r.rpush('movements', data)
-    emit('movements', data, broadcast=True)  # Emit drawing data to all clients
-
-
-@socketio.on('draw', namespace='/admin/lab')
-def handle_draw(data):
-    # Store the pixel data in Redis
-    r.rpush(channel, data)
-    # Broadcast the pixel data to all connected clients
-    socketio.emit('lab/live', data, broadcast=True)
-
-
-@socketio.on('drawing_data', namespace='/admin/lab')
-def handle_drawing_data(data):
-    base64_data = data['drawing_data']
-    image_data = base64.b64decode(base64_data)
-    image = Image.open(io.BytesIO(image_data))
-    img_array = np.array(image)
-    # Do something with the NumPy array, e.g., save it to a file or perform analysis
-
-
-@socketio.on('submit', namespace='/admin/lab')
-def submit(data):
-    movements = json.dumps(data['movements'])
-    drawing = json.dumps(data['last_drawing'])
-    r.set('last_drawing', drawing)
-    r.set('movements', movements)
-    mouse_data = MouseData(movements=movements, drawing=drawing)
-    db.session.add(mouse_data)
-    db.session.commit()
 
 
 class MyLab(BaseView):
