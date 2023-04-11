@@ -2,6 +2,10 @@
 
 {% block body %}
 {% if lab_links %}
+    <h1>Lab Checklist Complete?</h1>
     <a href="{{ url_for('index') }}" class="btn btn-primary">Harmony Lab</a>
+    <a href="{{ url_for('notebook') }}" class="btn btn-primary">Notebook</a>
+    <a href="{{ url_for('webcam_feed') }}" class="btn btn-primary">Webcam</a>
+    <a href="{{ url_for('recording_feed') }}" class="btn btn-primary">Recording</a>
 {% endif %}
 {% endblock %}

@@ -7,6 +7,10 @@ from flask_cors import CORS
 from flask_login import LoginManager
 from models import User
 from socketio_events import socketio
+import eventlet
+
+eventlet.monkey_patch()
+
 session = Session()
 
 redis_host = 'localhost'
@@ -56,5 +60,6 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    socketio = SocketIO(app, cors_allowed_origins="*")
+    # eventlet run --worker-class eventlet -w 1 app:app
+    socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)

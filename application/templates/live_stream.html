@@ -1,10 +1,16 @@
 {% extends 'harmony.html' %}
+{% block head %}
+{{ super() }}
+{% endblock %}
+{% block content %}
+
+{% endblock %}
+{% block custom_js %}
 
 <script>
         const canvas = document.getElementsByTagName('canvas');
         const ctx = canvas.getContext('2d');
         const socket = io.connect('http://' + document.domain + ':' + location.port);
-
         socket.on('drawing_data', (data) => {
             if (data) {
                 ctx.beginPath();
@@ -17,3 +23,10 @@
             }
         });
     </script>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+            <script type="text/javascript" src="static/harmony/js/brushes/shaded.js"></script>
+    		<script type="text/javascript" src="static/harmony/js/about.js"></script>
+    		<script type="text/javascript" src="static/harmony/js/main.js"></script>
+{% endblock %}
