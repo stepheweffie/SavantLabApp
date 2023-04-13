@@ -3,7 +3,7 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask import current_app as app
 from flask_admin.contrib.fileadmin import FileAdmin
-from routes import AdminHomeView
+from routes import AdminHomeView, stream_feed
 from models import db, Drawing
 from redis import Redis
 from flask_admin.contrib import rediscli
@@ -20,11 +20,10 @@ class RecordingAdminView(ModelView):
     page_size = 50  # number of records to display per page
 
 
-# TODO make articles_path a mongo db view
 lab_path = op.join(op.dirname(__file__), 'labs')
 # articles_path = op.join(op.dirname(__file__), 'articles')
 admin = Admin(app, index_view=AdminHomeView(), template_mode='bootstrap3')
 admin.add_view(FileAdmin(base_path=lab_path, name="Labs"))
 # admin.add_view(FileAdmin(base_path=articles_path, name='Articles'))
-admin.add_view(RecordingAdminView(Drawing, db.session))
+admin.add_view(RecordingAdminView(Drawing, db.session, name='Drawings'))
 admin.add_view(rediscli.RedisCli(Redis()))

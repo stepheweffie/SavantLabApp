@@ -7,11 +7,19 @@ from __main__ import db, r
 from flask_admin import expose, AdminIndexView, BaseView
 from models import Recreate, Recording
 from forms import DrawingForm
-# from flask_admin.contrib.sqla import ModelView
 import cv2
 from flask_login import current_user
-from flask_socketio import join_room
 import mediapipe as mp
+from obswebsocket import obsws, requests
+
+# OBS Studio settings
+obs_host = 'localhost'
+obs_port = 4455
+obs_password = app.config['OBS_PASS']
+
+# Connect to OBS Studio using obs-websocket-py
+ws = obsws(obs_host, obs_port, obs_password)
+ws.connect()
 
 
 mp_drawing = mp.solutions.drawing_utils
@@ -64,16 +72,6 @@ def check_email():
     return render_template('check_email.html')
 
 
-@app.route('/notebook')
-def notebook():
-    nb_path = os.path.join(os.getcwd(), 'drawing_analysis.ipynb')
-    html_path = os.path.join(os.getcwd(), 'drawing_analysis.html')
-    # Convert the notebook to an HTML file
-    subprocess.call(['jupyter', 'nbconvert', '--to', 'html', nb_path, '--output', html_path])
-    # Serve the HTML file
-    return send_file(html_path)
-
-
 @app.route('/lab/live')
 def screen_feed():
     # join_room(channel)
@@ -95,26 +93,6 @@ def lab_live():
             frame = jpeg.tobytes()
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-
-@app.route('/admin/lab', methods=['GET', 'POST'])
-def index():
-    form = drawing_form
-    if is_two_factor_authenticated and not admin_login:
-        redirect(url_for('screen_feed'))
-    elif current_user and admin_login:
-        # lab_live()
-        return render_template('admin/lab.html', form=form)
-    if request == 'POST':
-        if form.validate_on_submit():
-            pixel_data = request.json['pixel_data']
-            pressure_data = request.json['pressure_data']
-            # Store the pixel and pressure data in Redis
-            r.set('pixel_data', pixel_data)
-            r.set('pressure_data', pressure_data)
-            redirect(url_for('index'))
-        else:
-            redirect(url_for('admin_index'))
 
 
 @app.route('/harmony')
@@ -175,7 +153,47 @@ def recreate_feed():
                         content_type='text/event-stream')
 
 
+@app.route('/notebook')
+def notebook():
+    nb_path = os.path.join(os.getcwd(), 'drawing_analysis.ipynb')
+    html_path = os.path.join(os.getcwd(), 'drawing_analysis.html')
+    # Convert the notebook to an HTML file
+    subprocess.call(['jupyter', 'nbconvert', '--to', 'html', nb_path, '--output', html_path])
+    # Serve the HTML file
+    return send_file(html_path)
+
+
+@app.route('/admin/lab', methods=['GET', 'POST'])
+def index():
+    form = drawing_form
+    if is_two_factor_authenticated and not admin_login:
+        redirect(url_for('screen_feed'))
+    elif current_user and admin_login:
+        # lab_live()
+        return render_template('admin/lab.html', form=form)
+    if request == 'POST':
+        if form.validate_on_submit():
+            pixel_data = request.json['pixel_data']
+            pressure_data = request.json['pressure_data']
+            # Store the pixel and pressure data in Redis
+            r.set('pixel_data', pixel_data)
+            r.set('pressure_data', pressure_data)
+            redirect(url_for('index'))
+        else:
+            redirect(url_for('/admin'))
+
+
+@app.route('/admin/stream', methods=['GET', 'POST'])
+def stream_feed():
+    if is_two_factor_authenticated and not admin_login:
+        redirect(url_for('screen_feed'))
+    elif current_user and admin_login:
+        # lab_live()
+        return render_template('admin/stream.html', admin_view=None)
+
+
 class MyLab(BaseView):
+
     @expose('/', methods=['GET', 'POST'])
     @expose('/lab')
     def index(self):
@@ -184,11 +202,41 @@ class MyLab(BaseView):
             return self.render('admin/lab.html', form=form)
         return self.render('admin/lab.html', form=form)
 
+    @expose('/stream')
+    def start_stream(self):
+        # TODO load the scenes for OBS to stream as one stream
+        scene_config = []
+        for scene in scene_config:
+            ws.call(requests.CreateScene(scene['name']))
+            ws.call(requests.SetSceneItemProperties(scene['name'], 'Scene', position=(scene['x'], scene['y']),
+                                                    bounds=(scene['width'], scene['height'])))
+        ws.call(requests.StartStreaming())
+        # Return a success message
+        return self.render('admin/stream.html', stream_status=get_stream_status(), stream_url=get_stream_url())
+
+
+# Helper function to get the OBS stream status
+def get_stream_status():
+    output = ws.call(requests.GetStreamingStatus())
+    if output.getStreaming():
+        return 'Running'
+    else:
+        return 'Stopped'
+
+
+# Helper function to get the OBS stream URL
+def get_stream_url():
+    output = ws.call(requests.GetStreamingStatus())
+    if output.getStreaming():
+        return output.getStream().getURL()
+    else:
+        return None
+
 
 class AdminHomeView(AdminIndexView):
-    @expose('/', methods=['GET'])
-    @app.route('/admin')
-    def admin_index(self):
+    @expose('/')
+    def index(self):
         return self.render('admin/index.html', lab_links=True)
+
 
 

@@ -1,0 +1,23 @@
+{% extends 'admin/harmony_lab.html' %}
+{% block body %}
+<div class="page-header">
+  <h1>{{ admin_view.name }}</h1>
+  <p class="lead">{{ admin_view.description }}</p>
+</div>
+
+{% if stream_url %}
+  <div class="alert alert-success" role="alert">
+    Stream URL: <a href="{{ stream_url }}" target="_blank">{{ stream_url }}</a>
+  </div>
+{% else %}
+  <div class="alert alert-danger" role="alert">
+    Stream is not running!
+  </div>
+{% endif %}
+
+{% if stream_status == 'Running' %}
+  <a href="{{ url_for('.stop_stream') }}" class="btn btn-danger">Stop Stream</a>
+{% else %}
+  <a href="{{ url_for('.start_stream') }}" class="btn btn-success">Start Stream</a>
+{% endif %}
+{% endblock %}
