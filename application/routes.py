@@ -11,11 +11,13 @@ import cv2
 from flask_login import current_user
 import mediapipe as mp
 from obswebsocket import obsws, requests
-
+from flask_socketio import join_room, emit
+from dotenv import load_dotenv
+load_dotenv()
 # OBS Studio settings
 obs_host = 'localhost'
 obs_port = 4455
-obs_password = app.config['OBS_PASS']
+obs_password = os.environ.get('OBS_PASS')
 
 # Connect to OBS Studio using obs-websocket-py
 ws = obsws(obs_host, obs_port, obs_password)
@@ -118,6 +120,7 @@ def articles():  # put application's code here
 @app.route('/recording')
 def recording_feed():
     def record():
+        # lab_live()
         Recording.start_recording()
         for frame in Recording.frames:
             ret, jpeg = cv2.imencode('.jpg', frame)
@@ -169,7 +172,8 @@ def index():
     if is_two_factor_authenticated and not admin_login:
         redirect(url_for('screen_feed'))
     elif current_user and admin_login:
-        # lab_live()
+        join_room('lab')
+        emit('subscribe_draw', {'message': 'Savant of Illusions has joined the lab'}, room='chat_channel')
         return render_template('admin/lab.html', form=form)
     if request == 'POST':
         if form.validate_on_submit():

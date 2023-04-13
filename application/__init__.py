@@ -24,7 +24,7 @@ login_manager = LoginManager()
 
 def create_app():
     '''Flask Factory'''
-    flask_app = Flask(__name__, instance_relative_config=True)
+    flask_app = Flask(__name__, instance_relative_config=True, template_folder='templates')
     print('Uses .env and config.py for settings ')
     from werkzeug.utils import import_string
     cfg = import_string('config.DevConfig')()
@@ -98,7 +98,7 @@ def create_app():
             for message in pubsub.listen():
                 if message['type'] == 'message':
                     data = message['data']
-                    emit('draw_data', data, broadcast=True)
+                    emit('chat_message', data, broadcast=True)
 
     @socketio.on('submit', namespace='/admin/lab')
     def submit(data):
